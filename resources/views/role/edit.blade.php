@@ -9,8 +9,9 @@
             <div class="col-md-8 d-flex   bg-danger">
                 <div class="d-flex flex-column flex-wrap" style="height: 100px;">
                     @foreach($izinler as $obje)
+{{--                        kişi izne direkt sahip ise--}}
 
-                        @if(in_array($obje->name,$enable))
+                        @if($kisi->hasDirectPermission($obje->name))
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="{{$obje->name}}" name="permissions[]" checked>
                                 <label class="form-check-label" for="flexCheckDefault">
@@ -18,25 +19,25 @@
                                 </label>
                             </div>
                         @endif
-
-                        @if(in_array($obje->name,$readOnly))
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="{{$obje->name}}" name="permissions[]" disabled checked>
-                                    <label class="form-check-label" for="flexCheckDefault">
-                                        {{$obje->name}}
-                                    </label>
-                                </div>
+{{--                            kişi bu izne rol icabı sahip ve direk sahip değilse--}}
+                        @if($kisi->hasPermissionTo($obje->name) && ! $kisi->hasDirectPermission($obje->name) )
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{$obje->name}}" name="permissions[]" disabled checked>
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    {{$obje->name}}
+                                </label>
+                            </div>
                         @endif
 
-                        @if(! $kisi->hasPermissionTo($obje->name))
+{{--                        kişi direct izne sahip değil ve rol icabı bu izine sahip değilse--}}
+                            @if(! $kisi->hasPermissionTo($obje->name))
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" value="{{$obje->name}}" name="permissions[]">
                                     <label class="form-check-label" for="flexCheckDefault">
                                         {{$obje->name}}
                                     </label>
                                 </div>
-                        @endif
-
+                            @endif
                     @endforeach
                 </div>
             </div>

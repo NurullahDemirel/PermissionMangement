@@ -21,10 +21,7 @@ class UserController extends Controller
         $izinler=Permission::all();
         $kisi=User::with('permissions','roles.permissions')->where('id',$id)->first();
 
-        $readOnly=$this->readOnly($kisi);
-        $enable=$this->enable($kisi);
-
-        return view('role.edit',compact('izinler','kisi','readOnly','enable'));
+        return view('role.edit',compact('izinler','kisi'));
     }//izni olan kişinin ,herhangi bir kişinin rollerine ek olarak ekleme veya çıkrtma yapmak istediğinde düştüğü view sayfasını görüntüler
 
     public function getNewPermission(Request $request,$id){
@@ -157,31 +154,6 @@ class UserController extends Controller
 
     }//kullanıcı detaylarını yakalayan
 
-    public function readOnly(User $user){
-        $disabledArray=array();
-        $izinler=Permission::all();
-        foreach ($user->roles as $role){
 
-            foreach ($izinler as $izin){
-                if( ($role->hasPermissionTo($izin->name)) &&  !(in_array($izin->name,$disabledArray)) ){
-                    array_push($disabledArray,$izin->name);
-                }
-            }
-        }
-        return $disabledArray;
-    }//kişinin bütün rollerini alır sahip olduğu izinlerin birleşimini array olatrak verir.
-
-    public function enable(User $user){
-        $disabledArray=array();
-        $izinler=DB::select('select * from permissions');
-        foreach ($user->roles as $role){
-            foreach ($izinler as $izin){
-                if(($user->hasDirectPermission($izin->name))  &&  !(in_array($izin->name,$disabledArray))){
-                    array_push($disabledArray,$izin->name);
-                }
-            }
-        }
-        return $disabledArray;
-    } //kişinin rolünde olmayıp ek olarak aldığı izinleri array olarak dönen fonk
 
 }
