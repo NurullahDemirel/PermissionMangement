@@ -26,71 +26,11 @@ class UserController extends Controller
 
     public function getNewPermission(Request $request,$id){
 
-        //kişiyi al
-        //eklediklerini ve daha önce işaretli olanları tespti et
-        //eğer çıkarıyorsa bütün ek izinleri bunun kontrolünü yap
-        //daha fazla ekleme mi yapıyor yoksa çıkartmamı yapıyor tespit et
-
-
         $kisi=User::with(['roles','permissions'])->where('id',$id)->first();
-
-        $oldCount=count($kisi->permissions);
-        $oldPermissions=[];
-
-        foreach ($kisi->permissions as $index=>$izin){
-            $oldPermissions[$index]=$izin->name;
-        }
 
         $newPermissions=$request->permissions;
 
-
-        if(!is_array($newPermissions)){
-
-            foreach ($oldPermissions as  $oldPermission){
-                $kisi->revokePermissionTo($oldPermission);
-            }
-
-            return redirect()->route('edit-permisson',$id);
-        }//role hariç ek verdiklerini çıkarmış ise
-
-        $newCount=count($newPermissions);
-
-        if($oldCount>$newCount && is_array($newPermissions)){
-
-            foreach ($oldPermissions as  $oldPermission){
-                if (!in_array($oldPermission,$newPermissions)){
-                    $kisi->revokePermissionTo($oldPermission);
-                }
-            }
-
-        }//old büyük ve new de bir eleman varsa
-
-        if ($newCount>$oldCount){
-            for ($i=0;$i<$newCount;$i++){
-                if(($i<$oldCount)){
-                    if(!($oldPermissions[$i]==$newPermissions[$i])){
-                        $kisi->revokePermissionTo($oldPermissions[$i]);
-                        $kisi->givePermissionTo($newPermissions[$i]);
-                    }
-
-                    else{
-                        $kisi->givePermissionTo($newPermissions[$i]);
-                    }
-                }
-                else{
-                    $kisi->givePermissionTo($newPermissions[$i]);
-                }
-            }
-        }//new büyükse ekliyor
-
-        if ($newCount == $oldCount){
-            foreach ($oldPermissions as $index=>$oldPermission){
-                if(!($oldPermission ==$newPermissions[$index])){
-                    $kisi->revokePermissionTo($oldPermission);
-                    $kisi->givePermissionTo($newPermissions[$index]);
-                }
-            }
-        }
+        $kisi->syncPermissions($newPermissions);
 
         return redirect()->route('edit-permisson',$id);
     }//kişiye sahip olğu rolden başka görev eklemesi veya çıkartması yaptığımızda post işleminin düştüğü fonk.

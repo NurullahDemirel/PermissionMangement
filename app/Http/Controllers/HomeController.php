@@ -25,7 +25,7 @@ class HomeController extends Controller
     public function index()
     {
         $user=User::find(5);
-
+//        $user->syncPermissions(['edit articles','delete articles']);
         return view('home');
     }
 }
